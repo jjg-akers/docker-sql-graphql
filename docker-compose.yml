@@ -1,0 +1,26 @@
+version: "3.3"
+
+services:
+  app:
+    build:
+      context: "./api"
+    env_file: .env
+    volumes:
+      - ./api/:/app/
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    ports:
+      - "8080:8080"
+  mysql:
+    image: mysql:5.6
+    restart: always
+    environment:
+      # MYSQL_USER: "user"
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: exercise
+    volumes:
+      - ./db/initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - "3308:3306"
