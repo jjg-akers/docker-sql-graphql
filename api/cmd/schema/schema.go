@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/graphql-go/graphql"
@@ -39,8 +40,58 @@ func init() {
 		},
 	})
 
+	Mutation := graphql.NewObject(graphql.ObjectConfig{
+		Name: "Mutation",
+		Fields: graphql.Fields{
+			"createPublication": &graphql.Field{
+				Type:        types.PublicationType,
+				Description: "create a new publication",
+				Args: graphql.FieldConfigArgument{
+					"id": &graphql.ArgumentConfig{
+						Description: "id of new publication",
+						Type:        graphql.NewNonNull(graphql.Int),
+					},
+					"title": &graphql.ArgumentConfig{
+						Description: "the title of the new publication",
+						Type:        graphql.NewNonNull(graphql.String),
+					},
+					"uri": &graphql.ArgumentConfig{
+						Description: "the uri of the new publication",
+						Type:        graphql.NewNonNull(graphql.String),
+					},
+					"date_added": &graphql.ArgumentConfig{
+						Description: "the date added of the new publication",
+						Type:        graphql.NewNonNull(graphql.String),
+					},
+				},
+				Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+					// marshall and cast the arguments
+					id, ok := params.Args["id"].(int)
+					if !ok {
+						return nil, fmt.Errorf("could not convert id to int")
+					}
+					title, ok := params.Args["title"].(string)
+					if !ok {
+						return nil, fmt.Errorf("could not convert name to string")
+					}
+					uri, ok := params.Args["uri"].(string)
+					if !ok {
+						return nil, fmt.Errorf("could not convert uri to string")
+					}
+					dateAdded, ok := params.Args["date_added"].(string)
+					if !ok {
+						return nil, fmt.Errorf("could not convert date_added to string")
+					}
+
+					return resolvers.CreatePublication(id, title, uri, dateAdded), nil
+				},
+			},
+		},
+	})
+
 	schema, err := graphql.NewSchema(graphql.SchemaConfig{
-		Query: Query,
+		Query:    Query,
+		Mutation: Mutation,
 	})
 	if err != nil {
 		log.Panic(err)

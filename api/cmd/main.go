@@ -98,7 +98,7 @@ func main() {
 		fmt.Println("error marshalling: ", err)
 	}
 
-	fmt.Println("length of thing: ", len(t.Items))
+	//fmt.Println("length of thing: ", len(t.Items))
 
 	// time.Sleep(time.Second * 10)
 
@@ -142,7 +142,7 @@ func main() {
 
 	ctx := context.Background()
 
-	fmt.Println("query: ", sb.String())
+	//fmt.Println("query: ", sb.String())
 
 	//queryStr := strings.TrimSuffix(sb.String(), ","
 	query, err := DB.PrepareContext(ctx, sb.String())

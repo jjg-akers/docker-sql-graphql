@@ -36,3 +36,16 @@ func GetPublication(id int) Publication {
 
 	return Publication{}
 }
+
+func CreatePublication(id int, title, uri, dateAdded string) Publication {
+	toReturn := Publication{
+		ID:    id,
+		Title: title,
+		URI:   uri,
+		Date:  dateAdded,
+	}
+
+	publications = append(publications, toReturn)
+
+	return toReturn
+}
