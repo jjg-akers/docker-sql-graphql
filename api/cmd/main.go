@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/graphql-go/graphql"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/graphql-go/handler"
 	"github.com/jjg-akers/docker-sql-graphql/cmd/schema"
@@ -184,11 +186,55 @@ func main() {
 
 	//graphql api server
 	http.Handle("/graphql", h)
+	http.HandleFunc("/graphql", graphqlHandler)
 
 	fmt.Println("starting server of 8080")
 
 	http.ListenAndServe(":8080", nil)
 
+}
+
+//graphqlHandler for graphql route. Only allow POST methods
+func graphqlHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST":
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			panic(err)
+		}
+
+		// create struct for handlingin coming POST requests
+		type GraphQLPostBody struct {
+			Query         string                 `json:"query"`
+			Variables     map[string]interface{} `json:"variables"`
+			OperationName string                 `json:"operationName"`
+		}
+
+		// decerialize request
+		var graphQLPostBody GraphQLPostBody
+		err = json.Unmarshal(body, &graphQLPostBody)
+		if err != nil {
+			log.Panicln("error unmarshalling body: ", err)
+		}
+
+		// extract token from the header
+		token := r.Header.Get("token")
+
+		// pass token into the context on graphql handler with query and params
+		// now the token can be accessed on any resolver by accessing the context
+		result := graphql.Do(graphql.Params{
+			Schema:         schema.Schema,
+			RequestString:  graphQLPostBody.Query,
+			VariableValues: graphQLPostBody.Variables,
+			OperationName:  graphQLPostBody.OperationName,
+			Context:        context.WithValue(context.Background(), "token", token),
+		})
+
+		json.NewEncoder(w).Encode(result)
+
+	default:
+		fmt.Fprintf(w, "sorry, only POST method is supported.")
+	}
 }
 
 type Thing struct {

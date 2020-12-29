@@ -1,5 +1,10 @@
 package resolvers
 
+import (
+	"errors"
+	"github.com/graphql-go/graphql/gqlerrors"
+)
+
 type Publication struct {
 	ID    int    `json:"id"`
 	Title string `json:"title"`
@@ -27,14 +32,14 @@ func GetPublications() []Publication {
 	return publications
 }
 
-func GetPublication(id int) Publication {
+func GetPublication(id int) (Publication, error) {
 	for _, pub := range publications {
 		if pub.ID == id {
-			return pub
+			return pub, nil
 		}
 	}
 
-	return Publication{}
+	return Publication{}, gqlerrors.FormatError(errors.New("could not find Publication with given ID"))
 }
 
 func CreatePublication(id int, title, uri, dateAdded string) Publication {
