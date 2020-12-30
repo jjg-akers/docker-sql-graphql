@@ -83,15 +83,33 @@ func init() {
 						return nil, fmt.Errorf("could not convert date_added to string")
 					}
 
-					return resolvers.CreatePublication(id, title, uri, dateAdded), nil
+					pub := resolvers.CreatePublication(id, title, uri, dateAdded)
+
+					// notify all the subscribers and publish changes
+					PublicationPublisher()
+					return pub, nil
+				},
+			},
+		},
+	})
+
+	Subscription := graphql.NewObject(graphql.ObjectConfig{
+		Name: "Subscription",
+		Fields: graphql.Fields{
+			// newPublication will return a list of publications with new ones in it
+			"newPublication": &graphql.Field{
+				Type: graphql.NewList(types.PublicationType),
+				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					return resolvers.Publications, nil // return updated list
 				},
 			},
 		},
 	})
 
 	schema, err := graphql.NewSchema(graphql.SchemaConfig{
-		Query:    Query,
-		Mutation: Mutation,
+		Query:        Query,
+		Mutation:     Mutation,
+		Subscription: Subscription,
 	})
 	if err != nil {
 		log.Panic(err)

@@ -16,6 +16,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/graphql-go/handler"
 	"github.com/jjg-akers/docker-sql-graphql/cmd/schema"
+	"github.com/jjg-akers/docker-sql-graphql/cmd/subscriptions"
 )
 
 func search(w http.ResponseWriter, r *http.Request) {
@@ -174,16 +175,21 @@ func main() {
 	// UnmarshalJSON()
 
 	h := handler.New(&handler.Config{
-		Schema: &schema.Schema,
-		Pretty: true,
+		Schema:     &schema.Schema,
+		Pretty:     true,
+		GraphiQL:   false,
+		Playground: true,
 	})
 
-	// serve Graphiql in-brower editor
-	fs := http.FileServer(http.Dir("../static"))
-	http.Handle("/", fs)
-
 	//graphql api server
-	http.Handle("/graphql", h)
+	http.Handle("/", h)
+
+	// set up handler for new subscriptions
+	http.HandleFunc("/subscriptions", subscriptions.Handler)
+
+	// serve Graphiql in-brower editor
+	// fs := http.FileServer(http.Dir("../static"))
+	// http.Handle("/", fs)
 
 	fmt.Println("starting server of 8080")
 

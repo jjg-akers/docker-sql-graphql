@@ -21,14 +21,14 @@ var test2 = Publication{
 	Date:  "testdate2",
 }
 
-var publications = []Publication{test1, test2}
+var Publications = []Publication{test1, test2}
 
 func GetPublications() []Publication {
-	return publications
+	return Publications
 }
 
 func GetPublication(id int) Publication {
-	for _, pub := range publications {
+	for _, pub := range Publications {
 		if pub.ID == id {
 			return pub
 		}
@@ -45,7 +45,7 @@ func CreatePublication(id int, title, uri, dateAdded string) Publication {
 		Date:  dateAdded,
 	}
 
-	publications = append(publications, toReturn)
+	Publications = append(Publications, toReturn)
 
 	return toReturn
 }
